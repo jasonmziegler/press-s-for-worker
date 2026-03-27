@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, render_template_string
 from taskqueue import add_task, list_tasks
-from memory import list_memories
+from memory import list_memories, delete_memory
 from toolbox import list_tools, delete_tool
 
 app = Flask(__name__)
@@ -212,6 +212,18 @@ DASHBOARD_HTML = """
     font-size: 0.85em;
   }
   .memory-summary { color: #c5c8c6; }
+  .memory-delete {
+    background: none;
+    border: 1px solid #3d0f1a;
+    color: #f92672;
+    font-family: inherit;
+    font-size: 0.7em;
+    padding: 2px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    float: right;
+  }
+  .memory-delete:hover { background: #3d0f1a; }
   .memory-meta {
     color: #555;
     font-size: 0.75em;
@@ -334,7 +346,7 @@ DASHBOARD_HTML = """
   <ul class="memory-list" id="tool-list"></ul>
 </div>
 
-<div class="refresh-note">Auto-refreshes every 3s | v0.5</div>
+<div class="refresh-note">Auto-refreshes every 3s | v0.6</div>
 
 <script>
 let thinkMode = true;
@@ -433,6 +445,7 @@ function refreshMemories() {
         ).join('') : '';
         return `
           <li class="memory-item">
+            <button class="memory-delete" onclick="deleteMemory(${m.id})">delete</button>
             <div class="memory-summary">${esc(m.summary)}</div>
             <div class="memory-meta">
               ${tags}
@@ -443,6 +456,11 @@ function refreshMemories() {
         `;
       }).join('') || '<li class="memory-item"><div class="memory-summary" style="color:#555">No memories yet. Memories are created automatically after tasks complete.</div></li>';
     });
+}
+
+function deleteMemory(id) {
+  if (!confirm('Delete this memory?')) return;
+  fetch(`/api/memories/${id}`, {method: 'DELETE'}).then(() => refreshMemories());
 }
 
 function deleteTool(id, name) {
@@ -509,6 +527,12 @@ def api_list_tools():
 @app.route("/api/tools/<int:tool_id>", methods=["DELETE"])
 def api_delete_tool(tool_id):
     if delete_tool(tool_id):
+        return jsonify({"status": "deleted"})
+    return jsonify({"error": "not found"}), 404
+
+@app.route("/api/memories/<int:memory_id>", methods=["DELETE"])
+def api_delete_memory(memory_id):
+    if delete_memory(memory_id):
         return jsonify({"status": "deleted"})
     return jsonify({"error": "not found"}), 404
 

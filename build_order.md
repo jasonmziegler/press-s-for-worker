@@ -27,7 +27,7 @@
 
 ---
 
-## Phase 1 — Economy (get income flowing)
+## Phase 1 — Economy (get income flowing) [**Complete**]
 
 The mineral line. Boring but load-bearing. Everything else is funded by this.
 
@@ -41,7 +41,7 @@ The mineral line. Boring but load-bearing. Everything else is funded by this.
 
 ---
 
-## Phase 2 — Military (create power)
+## Phase 2 — Military (create power) [**In Progress**]
 
 The system stops being a script and starts being an agent.
 

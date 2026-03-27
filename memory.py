@@ -79,9 +79,23 @@ def search_memories(query: str, top_k: int = 5, min_score: float = 0.3) -> list[
 
 def extract_memories(task: str, result: str) -> list[dict]:
     """Ask the LLM to extract key facts from a completed task."""
-    prompt = f"""Extract the key facts, decisions, or knowledge from this completed task.
+    prompt = f"""Extract memories worth keeping from this completed task.
+
+A GOOD memory is:
+- A lesson learned from failure (what went wrong and why)
+- A design rule or principle discovered (guides future decisions)
+- A reasoning breakthrough (WHY something was chosen, not WHAT was built)
+- A milestone or major capability gained (not implementation details)
+
+A BAD memory is:
+- Implementation details (how open() works, what parameters a function takes)
+- Restating what a tool does (the tool already exists in the toolbox)
+- Vague generic wisdom ("good design is important")
+- Obvious facts ("a file reader reads files")
+
 Return ONLY a JSON array of objects, each with "summary" (one sentence) and "tags" (comma-separated keywords).
-Extract 1-3 memories. No explanation, just the JSON array.
+Extract 0-2 memories. If nothing is worth remembering, return an empty array [].
+No explanation, just the JSON array.
 
 Task: {task}
 
@@ -122,6 +136,18 @@ def build_context(task: str, top_k: int = 3) -> str:
     for m in memories:
         lines.append(f"- {m['summary']} (relevance: {m['score']})")
     return "\n".join(lines)
+
+def delete_memory(memory_id: int) -> bool:
+    """Delete a memory by ID."""
+    conn = get_db()
+    row = conn.execute("SELECT id FROM memories WHERE id = ?", (memory_id,)).fetchone()
+    if not row:
+        conn.close()
+        return False
+    conn.execute("DELETE FROM memories WHERE id = ?", (memory_id,))
+    conn.commit()
+    conn.close()
+    return True
 
 def list_memories() -> list[dict]:
     conn = get_db()
