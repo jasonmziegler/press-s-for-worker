@@ -2,3 +2,4 @@ __pycache__/
 *.pyc
 TEMP/
 tasks.db
+creators_log/
