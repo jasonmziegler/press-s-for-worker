@@ -88,8 +88,9 @@ A GOOD memory is:
 - A milestone or major capability gained (not implementation details)
 
 A BAD memory is:
-- Implementation details (how open() works, what parameters a function takes)
+- Implementation details (how open() works, what os.listdir() does, what parameters a function takes)
 - Restating what a tool does (the tool already exists in the toolbox)
+- Describing how to use a standard library function (the LLM already knows this)
 - Vague generic wisdom ("good design is important")
 - Obvious facts ("a file reader reads files")
 
@@ -126,7 +127,7 @@ Result: {result[:2000]}"""
     except json.JSONDecodeError:
         return []
 
-def build_context(task: str, top_k: int = 3) -> str:
+def build_context(task: str, top_k: int = 5) -> str:
     """Search memories and format them as context for a prompt."""
     memories = search_memories(task, top_k=top_k)
     if not memories:

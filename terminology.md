@@ -26,7 +26,7 @@ the platform's own vocabulary for public-facing use (code, UI, docs, README).
 | Refineries | **Reach** | External access tools — file system, web, APIs |
 | Engineering Bay | **Optimizer** | Self-evaluation — agent scores and refines its own output |
 | Starport | **Fleet** | Specialized worker types for different task categories |
-| Planetary Fortress | **Sentinel** | Persistence layer — auto-restart, error recovery, single launcher |
+| Planetary Fortress | **Watchtower** | Persistence layer — auto-restart, error recovery, single launcher |
 
 ## Task Modes
 

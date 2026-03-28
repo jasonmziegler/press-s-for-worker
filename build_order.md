@@ -89,6 +89,12 @@ Phase 1 is the mineral-saturated main base that funds everything else. No skippi
 
 ---
 
+## Design Constraints
+
+- **8K character file limit** — The Cortex truncates tool results at 8,000 characters. Any source file the system needs to read and modify must stay under this limit. If a file grows past 8K, split it into smaller modules. This is not optional — the system literally cannot see past the cutoff, and `write_file` on a file it can't fully read causes data loss (proven by dashboard.py being truncated twice).
+
+---
+
 ## Backlog (add when the time is right)
 
 - **Task priority** — urgent tasks jump the queue. Add a `priority` column to tasks table, sort by priority then id. Needed once task volume grows.

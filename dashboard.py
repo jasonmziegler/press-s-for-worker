@@ -3,6 +3,8 @@ from taskqueue import add_task, list_tasks
 from memory import list_memories, delete_memory
 from toolbox import list_tools, delete_tool
 
+__version__ = "v0.7"
+
 app = Flask(__name__)
 
 DASHBOARD_HTML = """
@@ -346,7 +348,7 @@ DASHBOARD_HTML = """
   <ul class="memory-list" id="tool-list"></ul>
 </div>
 
-<div class="refresh-note">Auto-refreshes every 3s | v0.6</div>
+<div class="refresh-note">Auto-refreshes every 3s | {{ version }}</div>
 
 <script>
 let thinkMode = true;
@@ -504,7 +506,7 @@ setInterval(refreshTools, 5000);
 
 @app.route("/")
 def index():
-    return render_template_string(DASHBOARD_HTML)
+    return render_template_string(DASHBOARD_HTML, version=__version__)
 
 @app.route("/api/tasks", methods=["GET"])
 def api_list_tasks():

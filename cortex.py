@@ -33,14 +33,30 @@ def load_tools() -> dict:
         for name, func in inspect.getmembers(module, inspect.isfunction):
             if name.startswith("_"):
                 continue
-            # build OpenAI-style function schema from signature
+            # build OpenAI-style function schema from signature + docstring
             sig = inspect.signature(func)
+            doc = func.__doc__ or ""
+            # parse "Args:" section from docstring for param descriptions
+            param_docs = {}
+            if "Args:" in doc:
+                args_section = doc.split("Args:")[1].split("Returns:")[0]
+                for line in args_section.strip().splitlines():
+                    line = line.strip()
+                    if ":" in line:
+                        pname, pdesc = line.split(":", 1)
+                        pname = pname.strip().split("(")[0].strip()
+                        param_docs[pname] = pdesc.strip()
+
             properties = {}
             required = []
             for param_name, param in sig.parameters.items():
-                properties[param_name] = {"type": "string", "description": param_name}
-                if param.default is inspect.Parameter.empty:
+                desc = param_docs.get(param_name, param_name)
+                prop = {"type": "string", "description": desc}
+                if param.default is not inspect.Parameter.empty:
+                    prop["default"] = str(param.default)
+                else:
                     required.append(param_name)
+                properties[param_name] = prop
 
             tools[name] = {
                 "function": func,
@@ -133,8 +149,9 @@ def run_cortex(task: str, think: bool = True, context: str = "") -> str:
             tool_log.append(func_name)
 
             # truncate very long results to avoid blowing context
-            if len(tool_result) > 4000:
-                tool_result = tool_result[:4000] + "\n... (truncated)"
+            # 8K context per LM Studio slot, must leave room for prompt + response
+            if len(tool_result) > 8000:
+                tool_result = tool_result[:8000] + "\n... (truncated)"
 
             messages.append({
                 "role": "tool",

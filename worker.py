@@ -64,8 +64,17 @@ def run_loop():
         think = bool(task.get("think", 1))
         mode = "think" if think else "fast"
 
+        # core behavioral rules — always injected, not subject to retrieval
+        preamble = (
+            "Core rules (always apply):\n"
+            "- You are a worker, not an advisor. If you find a problem you can fix, fix it. Deliver solutions, not just diagnoses.\n"
+            "- Before reviewing, evaluating, or modifying any code, read the actual source file first using your tools. The source file is the only truth.\n"
+            "- When building or fixing a tool, write the complete Python code in a ```python code block in your response. The Forge extracts it automatically.\n"
+            "- Never rewrite a file from memory. Read it first, then modify. Skipping this causes regressions."
+        )
+
         # search memory and tools for relevant context
-        context_parts = []
+        context_parts = [preamble]
         mem_context = build_context(task_text)
         if mem_context:
             context_parts.append(mem_context)
@@ -83,15 +92,20 @@ def run_loop():
             complete_task(current_task_id, result)
             print(f"[#{current_task_id}] Done -> {out_file}")
 
-            # extract and store memories from the completed task
-            memories = extract_memories(task_text, result)
-            for mem in memories:
-                mid = store_memory(
-                    summary=mem["summary"],
-                    tags=mem.get("tags", ""),
-                    source_task_id=current_task_id
-                )
-                print(f"[#{current_task_id}] Memory stored: #{mid} {mem['summary'][:60]}")
+            # only extract memories from grounded tasks (used tools or produced code)
+            used_tools = "[Cortex: used" in result
+            produced_code = "```python" in result
+            if used_tools or produced_code:
+                memories = extract_memories(task_text, result)
+                for mem in memories:
+                    mid = store_memory(
+                        summary=mem["summary"],
+                        tags=mem.get("tags", ""),
+                        source_task_id=current_task_id
+                    )
+                    print(f"[#{current_task_id}] Memory stored: #{mid} {mem['summary'][:60]}")
+            else:
+                print(f"[#{current_task_id}] Skipping memory extraction (no tools used, no code produced)")
 
             # check if the output contains a saveable tool
             tool = extract_and_save_tool(task_text, result, current_task_id)
