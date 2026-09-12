@@ -1,3 +1,4 @@
+import os
 import signal
 import sys
 import time
@@ -70,7 +71,8 @@ def run_loop():
             "- You are a worker, not an advisor. If you find a problem you can fix, fix it. Deliver solutions, not just diagnoses.\n"
             "- Before reviewing, evaluating, or modifying any code, read the actual source file first using your tools. The source file is the only truth.\n"
             "- When building or fixing a tool, write the complete Python code in a ```python code block in your response. The Forge extracts it automatically.\n"
-            "- Never rewrite a file from memory. Read it first, then modify. Skipping this causes regressions."
+            "- Never rewrite a file from memory. Read it first, then modify. Skipping this causes regressions.\n"
+            "- If a task has 3+ independent parts (e.g. 'test all tools', 'update A, B, and C'), call queue_task once per part, then stop. Do NOT decompose single-goal tasks like bug fixes."
         )
 
         # search memory and tools for relevant context
@@ -87,15 +89,20 @@ def run_loop():
         print(f"[#{current_task_id}] [{mode}] Processing: {task_text[:80]}...")
 
         try:
-            result = run_cortex(task_text, think=think, context=context)
+            os.environ["WORKER_TASK_ID"] = str(current_task_id)
+            # subtasks cannot decompose further — prevent fork bombs
+            is_subtask = task.get("parent_task_id") is not None
+            exclude = ["queue_task"] if is_subtask else []
+            result = run_cortex(task_text, think=think, context=context, exclude_tools=exclude)
             out_file = save_output(current_task_id, task_text, result, context)
             complete_task(current_task_id, result)
             print(f"[#{current_task_id}] Done -> {out_file}")
 
-            # only extract memories from grounded tasks (used tools or produced code)
+            # only extract memories from grounded tasks (used tools, pre-read files, or produced code)
             used_tools = "[Cortex: used" in result
+            pre_read = "Pre-read source files:" in result
             produced_code = "```python" in result
-            if used_tools or produced_code:
+            if used_tools or pre_read or produced_code:
                 memories = extract_memories(task_text, result)
                 for mem in memories:
                     mid = store_memory(

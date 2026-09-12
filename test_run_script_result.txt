@@ -1,0 +1,1 @@
+Test for run_script tool was successful. Output matched expected results and returned code 0.

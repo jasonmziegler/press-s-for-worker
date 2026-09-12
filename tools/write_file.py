@@ -8,5 +8,12 @@ def write_file(file_path: str, content: str) -> None:
         file_path (str): The path of the file to be written.
         content (str): The content to be written into the file.
     """
-    with open(file_path, 'w') as f:
+    """
+    Writes a given string content to a specified file path.
+
+    Args:
+        file_path (str): The path of the file to be written.
+        content (str): The content to be written into the file.
+    """
+    with open(file_path, 'w', encoding='utf-8') as f:
         f.write(content)

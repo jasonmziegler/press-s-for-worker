@@ -16,13 +16,16 @@ def get_db():
             created_at TEXT NOT NULL,
             started_at TEXT,
             completed_at TEXT,
-            result TEXT
+            result TEXT,
+            parent_task_id INTEGER
         )
     """)
-    # migrate: add think column if missing (existing DBs)
+    # migrate: add columns if missing (existing DBs)
     columns = [r[1] for r in conn.execute("PRAGMA table_info(tasks)").fetchall()]
     if "think" not in columns:
         conn.execute("ALTER TABLE tasks ADD COLUMN think INTEGER NOT NULL DEFAULT 1")
+    if "parent_task_id" not in columns:
+        conn.execute("ALTER TABLE tasks ADD COLUMN parent_task_id INTEGER")
     conn.commit()
     return conn
 
