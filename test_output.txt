@@ -1,3 +1,0 @@
-
-This is a test file for the write_file function.
-It should be written correctly into the file.

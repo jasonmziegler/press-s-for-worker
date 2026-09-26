@@ -3,3 +3,11 @@ __pycache__/
 TEMP/
 tasks.db
 creators_log/
+
+# Scratch files the agent writes while testing its tools
+.test_*
+test_*.txt
+temp_*.txt
+run_script_test.txt
+test_results
+test_directory/
