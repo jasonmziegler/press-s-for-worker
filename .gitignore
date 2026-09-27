@@ -9,3 +9,11 @@ model_settings.db*
 worker_model.lock
 model_switch.lock
 .runtime/
+
+# Scratch files the agent writes while testing its tools
+.test_*
+test_*.txt
+temp_*.txt
+run_script_test.txt
+test_results
+test_directory/
