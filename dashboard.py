@@ -3,9 +3,11 @@ from taskqueue import add_task, list_tasks
 from memory import list_memories, delete_memory
 from toolbox import list_tools, delete_tool
 
-__version__ = "v0.7"
+__version__ = "v0.8"
 
 app = Flask(__name__)
+from model_routes import models
+app.register_blueprint(models)
 
 DASHBOARD_HTML = """
 <!DOCTYPE html>
@@ -300,6 +302,20 @@ DASHBOARD_HTML = """
 <body>
 
 <h1>// WORKER DASHBOARD</h1>
+<section style="border:1px solid #334455;padding:16px;margin:16px 0;border-radius:6px">
+  <h2 style="font-size:1em;color:#66ccff">WORKER MODEL</h2>
+  <p style="margin:10px 0">Selected: <span id="active-model">Loading...</span></p>
+  <label for="model-select">Model</label>
+  <select id="model-select" style="max-width:100%;padding:8px;background:#18222e;color:#eee"></select>
+  <label for="model-context">Context</label>
+  <select id="model-context" style="padding:8px;background:#18222e;color:#eee">
+    <option value="8192">8K</option><option value="16384" selected>16K</option><option value="32768">32K</option>
+  </select>
+  <button id="model-switch" type="button" disabled>Switch model</button>
+  <p id="model-status" role="status" aria-live="polite" style="margin-top:10px">Connecting to LM Studio...</p>
+  <p style="font-size:.8em;color:#99aabb;margin-top:8px">Switching waits for the current task. Other loaded models stay unchanged.</p>
+</section>
+
 <div class="subtitle">press-s-for-worker</div>
 
 <div class="stats">
@@ -500,6 +516,7 @@ setInterval(refreshMemories, 5000);
 setInterval(refreshTools, 5000);
 </script>
 
+<script src="/static/models.js"></script>
 </body>
 </html>
 """

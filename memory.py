@@ -9,7 +9,7 @@ from datetime import datetime
 DB_PATH = Path(__file__).parent / "tasks.db"
 API_URL = "http://localhost:1234/v1"
 EMBED_MODEL = "text-embedding-nomic-embed-text-v1.5"
-LLM_MODEL = "qwen/qwen3-14b"
+from model_control import active_model
 
 def get_db():
     conn = sqlite3.connect(DB_PATH)
@@ -105,7 +105,7 @@ Result: {result[:2000]}"""
     response = requests.post(
         f"{API_URL}/chat/completions",
         json={
-            "model": LLM_MODEL,
+            "model": active_model(),
             "messages": [{"role": "user", "content": prompt + " /no_think"}],
             "temperature": 0.3
         },

@@ -3,3 +3,9 @@ __pycache__/
 TEMP/
 tasks.db
 creators_log/
+
+# Local model coordination
+model_settings.db*
+worker_model.lock
+model_switch.lock
+.runtime/

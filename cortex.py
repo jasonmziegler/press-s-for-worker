@@ -14,7 +14,7 @@ import sqlite3
 from pathlib import Path
 
 API_URL = "http://localhost:1234/v1/chat/completions"
-MODEL = "qwen/qwen3-14b"
+from model_control import active_model
 TOOLS_DIR = Path(__file__).parent / "tools"
 DB_PATH = Path(__file__).parent / "tasks.db"
 MAX_TOOL_ROUNDS = 10  # safety limit to prevent infinite loops
@@ -117,7 +117,7 @@ def plan_reads(task_prompt: str) -> tuple[list[str], str]:
         response = requests.post(
             API_URL,
             json={
-                "model": MODEL,
+                "model": active_model(),
                 "messages": [{"role": "user", "content": plan_prompt + " /no_think"}],
                 "temperature": 0.3
             },
@@ -214,7 +214,7 @@ def run_cortex(task: str, think: bool = True, context: str = "", exclude_tools: 
     for round_num in range(MAX_TOOL_ROUNDS):
         # build request
         request_body = {
-            "model": MODEL,
+            "model": active_model(),
             "messages": messages,
             "temperature": 0.7
         }
